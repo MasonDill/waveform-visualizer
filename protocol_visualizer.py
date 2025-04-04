@@ -4,6 +4,17 @@ import matplotlib.pyplot as plt
 from J1939 import J1939
 from protocol import Waveform, Protocol
 
+def get_time_formatter(max_time):
+    """Returns a formatter function based on the maximum time value"""
+    if max_time < 1e-6:  # Less than 1 microsecond
+        return lambda x, p: f'{x*1e9:.0f}ns'
+    elif max_time < 1e-3:  # Less than 1 millisecond
+        return lambda x, p: f'{x*1e6:.0f}µs'
+    elif max_time < 1:  # Less than 1 second
+        return lambda x, p: f'{x*1e3:.0f}ms'
+    else:
+        return lambda x, p: f'{x:.3f}s'
+
 def plot_waveform(waveform: Waveform, title: str = "Protocol Waveform"):
     """Plot the waveform using matplotlib"""
     
@@ -16,14 +27,8 @@ def plot_waveform(waveform: Waveform, title: str = "Protocol Waveform"):
     
     # Format time axis to use appropriate units
     max_time = max(waveform.time_points)
-    if max_time < 1e-6:  # Less than 1 microsecond
-        plt.gca().xaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f'{x*1e9:.0f}ns'))
-    elif max_time < 1e-3:  # Less than 1 millisecond
-        plt.gca().xaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f'{x*1e6:.0f}µs'))
-    elif max_time < 1:  # Less than 1 second
-        plt.gca().xaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f'{x*1e3:.0f}ms'))
-    else:
-        plt.gca().xaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f'{x:.3f}s'))
+    formatter = get_time_formatter(max_time)
+    plt.gca().xaxis.set_major_formatter(plt.FuncFormatter(formatter))
         
     plt.show()
 
