@@ -20,7 +20,7 @@ class Field:
         self.name = name
         self.symbols = symbols
 
-    def parse_user_data(self, data: str, frame_start: int) -> List[Symbol]:
+    def parse_as_string(self, data: str, frame_start: int = 0) -> List[Symbol]:
         """Parse the user data from the input string into the frame"""
         start_index = frame_start // 4 # each char is 4 bits
         num_chars = self.length // 4 # each char is 4 bits
@@ -30,8 +30,12 @@ class Field:
         data = data[frame_start:frame_start+num_chars]
         data_int = int(data, 16)
 
+        self.parse_as_decimal(data_int)
+    
+    def parse_as_decimal(self, data: int) -> List[Symbol]:
+        """Parse the user data from the input string into the frame"""
         for i in range(self.length):
-            bit_value = (data_int >> i) & 1
+            bit_value = (data >> i) & 1
             self.symbols[self.length - i - 1].logic_level = bit_value
 
 class Frame:
@@ -51,7 +55,7 @@ class Frame:
         """Parse the user data from the input string into the frame"""
         frame_start = 0
         for field in self.fields:
-            field.parse_user_data(data, frame_start)
+            field.parse_as_string(data, frame_start)
             frame_start += field.length
 
 class Waveform:

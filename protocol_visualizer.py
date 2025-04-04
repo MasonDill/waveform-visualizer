@@ -2,7 +2,7 @@ import argparse as ap
 import matplotlib.pyplot as plt
 
 from J1939 import J1939
-from protocol import Waveform
+from protocol import Waveform, Protocol
 
 def plot_waveform(waveform: Waveform, title: str = "Protocol Waveform"):
     """Plot the waveform using matplotlib"""
@@ -27,13 +27,35 @@ def plot_waveform(waveform: Waveform, title: str = "Protocol Waveform"):
         
     plt.show()
 
-# Example usage
+def interactive_entry(protocol: Protocol) -> Waveform:
+    mode = input("Hex or Decimal? (h/d): ")
+    
+    for field in protocol.data_frame.fields:
+        field_data = input(f"Enter the data for {field.name}: ")
+
+        if mode == "h":
+            field.parse_as_string(field_data)
+        elif mode == "d":
+            field.parse_as_decimal(int(field_data, 16))
+        else:
+            raise ValueError("Invalid mode")
+
+    waveform = protocol.generate_waveform()
+    return waveform
+
 if __name__ == "__main__":
     parser = ap.ArgumentParser(description="Visualize protocol waveforms")
     parser.add_argument("data", type=str, help="The data to visualize")
+    parser.add_argument("-i", "--interactive", action="store_true", help="Interactive mode")
     args = parser.parse_args()
 
     protocol = J1939()
+
+    waveform = None
     
-    # Plot the waveform
-    plot_waveform(protocol.generate_waveform(args.data), "J1939 Protocol Waveform") 
+    if args.interactive:
+        waveform = interactive_entry(protocol)
+    else:
+        waveform = protocol.generate_waveform(args.data)
+    
+    plot_waveform(waveform, "J1939 Protocol Waveform") 
