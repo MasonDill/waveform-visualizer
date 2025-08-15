@@ -16,9 +16,13 @@ class Field:
     length: int
     symbols: List[Symbol]
 
-    def __init__(self, name: str, length: int, symbols: List[Symbol]=List[Symbol](length)):
+    def __init__(self, name: str, length: int, symbols: List[Symbol]=None):
         self.name = name
-        self.symbols = symbols
+        self.length = length
+        if symbols is None:
+            self.symbols = [Symbol(0, 0) for _ in range(length)]
+        else:
+            self.symbols = symbols
 
     def parse_as_string(self, data: str, frame_start: int = 0) -> List[Symbol]:
         """Parse the user data from the input string into the frame"""

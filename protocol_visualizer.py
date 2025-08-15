@@ -1,7 +1,7 @@
 import argparse as ap
 import matplotlib.pyplot as plt
 
-from J1939 import J1939
+from J1939 import J1939, J1939ProbeConfiguration
 from protocol import Waveform, Protocol
 
 def get_time_formatter(max_time):
@@ -50,17 +50,19 @@ def interactive_entry(protocol: Protocol) -> Waveform:
 
 if __name__ == "__main__":
     parser = ap.ArgumentParser(description="Visualize protocol waveforms")
-    parser.add_argument("data", type=str, help="The data to visualize")
+    parser.add_argument("-d", "--data", type=str, help="The data to visualize", required=False)
     parser.add_argument("-i", "--interactive", action="store_true", help="Interactive mode")
     args = parser.parse_args()
 
-    protocol = J1939()
+    protocol = J1939(J1939ProbeConfiguration.CAN_H)
 
     waveform = None
     
     if args.interactive:
         waveform = interactive_entry(protocol)
-    else:
+    elif args.data is not None:
         waveform = protocol.generate_waveform(args.data)
+    else:
+        raise ValueError("No data provided")
     
     plot_waveform(waveform, "J1939 Protocol Waveform") 
